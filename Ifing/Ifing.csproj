@@ -23,6 +23,7 @@
   <ItemGroup>
     <None Include="..\..\..\..\.nuget\packages\opencvsharp4.runtime.win\4.5.0.20201013\runtimes\win-x64\native\OpenCvSharpExtern.dll" Link="dll\x64\OpenCvSharpExtern.dll" />
     <None Include="..\..\..\..\.nuget\packages\opencvsharp4.runtime.win\4.5.0.20201013\runtimes\win-x64\native\opencv_videoio_ffmpeg450_64.dll" Link="dll\x64\opencv_videoio_ffmpeg450_64.dll" />
+    <None Include="..\README.md" Link="README.md" />
   </ItemGroup>
 
 </Project>
