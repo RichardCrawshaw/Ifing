@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -41,6 +42,7 @@
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.tssbVideoStart = new System.Windows.Forms.ToolStripSplitButton();
             this.flowLayoutPanel = new System.Windows.Forms.FlowLayoutPanel();
             this.timer = new System.Windows.Forms.Timer(this.components);
             this.menuStrip1.SuspendLayout();
@@ -131,7 +133,8 @@
             // 
             this.statusStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripStatusLabel1});
+            this.toolStripStatusLabel1,
+            this.tssbVideoStart});
             this.statusStrip1.Location = new System.Drawing.Point(0, 424);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Size = new System.Drawing.Size(800, 26);
@@ -144,6 +147,17 @@
             this.toolStripStatusLabel1.Size = new System.Drawing.Size(144, 20);
             this.toolStripStatusLabel1.Text = "Cameras detected: 0";
             // 
+            // tssbVideoStart
+            // 
+            this.tssbVideoStart.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.tssbVideoStart.Image = ((System.Drawing.Image)(resources.GetObject("tssbVideoStart.Image")));
+            this.tssbVideoStart.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tssbVideoStart.Name = "tssbVideoStart";
+            this.tssbVideoStart.Size = new System.Drawing.Size(100, 24);
+            this.tssbVideoStart.Text = "Start video";
+            this.tssbVideoStart.ToolTipText = "Start video";
+            this.tssbVideoStart.ButtonClick += new System.EventHandler(this.TssbVideoStart_ButtonClick);
+            // 
             // flowLayoutPanel
             // 
             this.flowLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -155,7 +169,6 @@
             // timer
             // 
             this.timer.Interval = 17;
-            this.timer.Tick += new System.EventHandler(this.Timer_Tick);
             // 
             // MainForm
             // 
@@ -193,8 +206,9 @@
         private ToolStripMenuItem tsmiVideo;
         private ToolStripMenuItem tsmiVideoStart;
         private ToolStripMenuItem tsmiVideoStop;
-        private System.Windows.Forms.Timer timer;
         private ToolStripSeparator tssVideo1;
         private ToolStripMenuItem tsmiVideoDevices;
+        private ToolStripSplitButton tssbVideoStart;
+        private System.Windows.Forms.Timer timer;
     }
 }
