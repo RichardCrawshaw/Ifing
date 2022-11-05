@@ -169,6 +169,7 @@
             // timer
             // 
             this.timer.Interval = 17;
+            this.timer.Tick += new System.EventHandler(this.Timer_Tick);
             // 
             // MainForm
             // 

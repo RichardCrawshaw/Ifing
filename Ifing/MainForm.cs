@@ -1,15 +1,11 @@
-using DirectShowLib;
-
 namespace Ifing
 {
-    public partial class MainForm : Form
+    public partial class MainForm : Form,
+        IPresenter
     {
         #region Fields
 
-        private readonly List<DsDevice> devices = new();
-        private readonly Dictionary<int, ImageDisplay> displays = new();
-
-        private bool? isRunning = false; // null indicates starting or stopping
+        private readonly IVideoManager videoManager;
 
         #endregion
 
@@ -18,93 +14,35 @@ namespace Ifing
         public MainForm()
         {
             InitializeComponent();
+
+            this.videoManager = new VideoManager(this);
         }
 
         #endregion
 
-        #region Support routines
+        #region IPresenter methods
 
-        private void Initialise()
-        {
-            this.devices.AddRange(
-                DsDevice.GetDevicesOfCat(FilterCategory.VideoInputDevice));
-
-            this.toolStripStatusLabel1.Text = $"Cameras detected: {this.devices.Count}";
-            this.tssbVideoStart.Enabled =
-            this.tsmiVideoStart.Enabled = 
-            this.tsmiVideoStop.Enabled = 
-                this.devices.Count > 0;
-
-            // Initialise each video device and create a menu item for it.
-            var deviceMenuItems =
-                Enumerable
-                    .Range(0, this.devices.Count)
-                    .Select(n => Initialise(n, this.devices[n]))
-                    .ToArray();
-
-            // Ensure that each device has a unique name presented to the user.
-            foreach (var deviceName in deviceMenuItems.Select(n => n.Text).Distinct())
+        void IPresenter.CheckMenuItem(ToolStripMenuItem menuItem, bool isChecked) => 
+            this.Invoke((MethodInvoker)delegate
             {
-                if (deviceMenuItems.Count(n => n.Text == deviceName) > 1)
-                {
-                    var index = 1;
-                    foreach (var tsmi in deviceMenuItems.Where(n => n.Text == deviceName))
-                        tsmi.Text = $"{tsmi.Text} #{index++}";
-                }
-            }
-            this.tsmiVideoDevices.DropDownItems.Clear();
-            this.tsmiVideoDevices.DropDownItems.AddRange(deviceMenuItems);
-        }
-
-        private ToolStripMenuItem Initialise(int index, DsDevice device)
-        {
-            var picture = new PictureBox
-            {
-                BackColor = SystemColors.ActiveCaptionText,
-                Name = $"picture{index}",
-                Size = new System.Drawing.Size(814, 435),
-                SizeMode = PictureBoxSizeMode.CenterImage,
-                Tag = index,
-            };
-            picture.DoubleClick += Picture_DoubleClick;
-
-            this.displays[index] = new ImageDisplay(picture, this.timer, index);
-
-            this.flowLayoutPanel.Controls.Add(picture);
-
-            var tsmi = new ToolStripMenuItem
-            {
-                Name = $"tsmiVideoDevicesDevice{index}",
-                Text = device.Name,
-                Tag = index,
-            };
-            tsmi.Click += TsmiVideoDevice_Click;
-            return tsmi;
-        }
-
-        private void Start()
-        {
-            if (this.isRunning ?? true) return;
-            this.isRunning = null;
-
-            Start(true);
-
-            Task.Run(() =>
-            {
-                foreach (var item in this.displays)
-                    item.Value.Start(item.Key);
-                foreach (ToolStripMenuItem tsmi in this.tsmiVideoDevices.DropDownItems)
-                    tsmi.Checked = true;
-                Start(false);
+                menuItem.Checked = isChecked;
             });
-        }
 
-        private void Start(bool flag)
+        void IPresenter.Start() => 
+            this.Invoke((MethodInvoker)delegate 
+            { 
+                this.timer.Start(); 
+            });
+
+        void IPresenter.Start(bool flag)
         {
             if (flag)
             {
-                this.tsmiVideoStart.Enabled = false;
-                this.tssbVideoStart.Enabled = false;
+                this.Invoke((MethodInvoker)delegate
+                {
+                    this.tsmiVideoStart.Enabled = false;
+                    this.tssbVideoStart.Enabled = false;
+                });
             }
             else
             {
@@ -115,35 +53,25 @@ namespace Ifing
                     this.tsmiVideoStop.Enabled = true;
                     this.tssbVideoStart.Text = "Stop video";
                     this.tssbVideoStart.Enabled = true;
-
-                    this.timer.Start();
                 });
-                this.isRunning = true;
             }
         }
 
-        private void Stop()
-        {
-            if (!(this.isRunning ?? false)) return;
-            this.isRunning = null;
+        void IPresenter.Stop() =>
+            this.Invoke((MethodInvoker)delegate 
+            { 
+                this.timer.Stop(); 
+            });
 
-            Stop(true);
-
-            foreach (var kvp in this.displays)
-                kvp.Value.Stop();
-            foreach (ToolStripMenuItem tsmi in this.tsmiVideoDevices.DropDownItems)
-                tsmi.Checked = false;
-            Stop(false);
-        }
-
-        private void Stop(bool flag)
+        void IPresenter.Stop(bool flag)
         {
             if (flag)
             {
-                this.timer.Stop();
-
-                this.tsmiVideoStop.Enabled = false;
-                this.tssbVideoStart.Enabled = false;
+                this.Invoke((MethodInvoker)delegate
+                {
+                    this.tsmiVideoStop.Enabled = false;
+                    this.tssbVideoStart.Enabled = false;
+                });
             }
             else
             {
@@ -155,9 +83,39 @@ namespace Ifing
                     this.tssbVideoStart.Text = "Start video";
                     this.tssbVideoStart.Enabled = true;
                 });
-                this.isRunning = false;
             }
         }
+
+        #endregion
+
+        #region Support routines
+
+        private void Initialise()
+        {
+            this.videoManager.Initialise();
+
+            this.videoManager.Images
+                .ForEach(n => n.DoubleClick += Picture_DoubleClick);
+            this.videoManager.MenuItems
+                .ForEach(n => n.Click += TsmiVideoDevice_Click);
+
+            this.flowLayoutPanel.Controls.AddRange(this.videoManager.Images.ToArray());
+
+            this.toolStripStatusLabel1.Text = $"Cameras detected: {this.videoManager.Count}";
+            this.tssbVideoStart.Enabled =
+            this.tsmiVideoStart.Enabled =
+            this.tsmiVideoStop.Enabled =
+                this.videoManager.Count > 0;
+
+            this.tsmiVideoDevices.DropDownItems.Clear();
+            this.tsmiVideoDevices.DropDownItems.AddRange(this.videoManager.MenuItems.ToArray());
+        }
+
+        private async Task StartAsync() => await this.videoManager.StartAsync();
+
+        private void Stop() => this.videoManager.Stop();
+
+        private void ShutDown() => this.videoManager?.Dispose();
 
         private void ToggleDevice(ToolStripItem? tsi)
         {
@@ -174,28 +132,16 @@ namespace Ifing
         private void ToggleDevice(int? index)
         {
             if (index is null) return;
-            ToggleDevice(this.displays[index.Value]);
+            ToggleDevice(this.videoManager[index.Value]);
         }
 
-        private void ToggleDevice(ImageDisplay display)
-        {
-            display.Enabled = !display.Enabled;
-            foreach (ToolStripMenuItem tsmi in this.tsmiVideoDevices.DropDownItems)
-            {
-                var displayIndex = tsmi.Tag as int?;
-                if (displayIndex == display.DisplayIndex)
-                    tsmi.Checked = display.Enabled;
-            }
-        }
+        private static void ToggleDevice(ImageDisplay display) => display.Enabled = !display.Enabled;
 
         #endregion
 
         #region Control event handler routines
 
-        private void MainForm_FormClosed(object sender, FormClosedEventArgs e) =>
-            this.displays?.Values
-                .ToList()
-                .ForEach(n => n?.Dispose());
+        private void MainForm_FormClosed(object sender, FormClosedEventArgs e) => ShutDown();
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e) => Stop();
 
@@ -209,7 +155,7 @@ namespace Ifing
 
         private void TsmiFileExit_Click(object sender, EventArgs e) => Close();
 
-        private void TsmiVideoStart_Click(object sender, EventArgs e) => Start();
+        private async void TsmiVideoStart_Click(object sender, EventArgs e) => await StartAsync();
 
         private void TsmiVideoStop_Click(object sender, EventArgs e) => Stop();
 
@@ -219,15 +165,21 @@ namespace Ifing
 
         #region Status bar event handler routines
 
-        private void TssbVideoStart_ButtonClick(object sender, EventArgs e)
+        private async void TssbVideoStart_ButtonClick(object sender, EventArgs e)
         {
-            if (!this.isRunning.HasValue)
+            if (!this.videoManager.IsRunning.HasValue)
                 return;
-            else if (this.isRunning.Value)
+            else if (this.videoManager.IsRunning.Value)
                 Stop();
             else
-                Start();
+                await StartAsync();
         }
+
+        #endregion
+
+        #region Timer event handler routines
+
+        private void Timer_Tick(object sender, EventArgs e) => this.videoManager.Capture();
 
         #endregion
     }

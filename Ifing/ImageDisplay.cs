@@ -11,15 +11,16 @@ namespace Ifing
     {
         #region Fields
 
+        private readonly IPresenter? presenter;
         private readonly PictureBox picture;
-        private readonly ToolStripStatusLabel? toolStripStatusLabel = null;
-
+        private readonly ToolStripMenuItem toolStripMenuItem;
         private VideoCapture? capture;
         private Bitmap? image1;
         private Bitmap? image2;
         private Mat? frame;
 
         private bool toggle = false;
+        private bool enabled = true;
 
         #endregion
 
@@ -27,21 +28,30 @@ namespace Ifing
 
         public int DisplayIndex { get; }
 
-        public bool Enabled { get; set; } = true;
-
+        public bool Enabled
+        {
+            get => enabled;
+            set
+            {
+                enabled = value;
+                CheckMenuItem();
+            }
+        }
         public bool IsDisposed { get; private set; } = false;
 
         #endregion
 
         #region Constructors
 
-        public ImageDisplay(PictureBox picture, System.Windows.Forms.Timer timer, int displayIndex)
+        public ImageDisplay(IPresenter? presenter,
+                            PictureBox picture,
+                            int displayIndex,
+                            ToolStripMenuItem toolStripMenuItem)
         {
+            this.presenter = presenter;
             this.picture = picture;
-
-            timer.Tick += Timer_Tick;
-
-            DisplayIndex = displayIndex;
+            this.DisplayIndex = displayIndex;
+            this.toolStripMenuItem = toolStripMenuItem;
         }
 
         #endregion
@@ -88,26 +98,9 @@ namespace Ifing
 
         #region Methods
 
-        public void Start(int index)
+        public void Capture()
         {
-            DisposeCameraResources();
-
-            this.capture = new VideoCapture(index);
-            this.capture.Open(index);
-        }
-
-        public void Stop()
-        {
-            DisposeCaptureResources();
-        }
-
-        #endregion
-
-        #region Support routines
-
-        private void Capture()
-        {
-            if (!this.Enabled) return;
+            if (!this.enabled) return;
 
             if (!(this.capture?.IsOpened() ?? false)) return;
 
@@ -147,11 +140,32 @@ namespace Ifing
                     this.image2?.Dispose();
                     this.image2 = null;
                 }
-
-                if (this.toolStripStatusLabel is not null)
-                    this.toolStripStatusLabel.Text = this.toggle ? "-" : "|";
             }
         }
+
+        public async Task<bool> StartAsync(int index)
+        {
+            DisposeCameraResources();
+
+            await Task.Run(() =>
+            {
+                this.capture = new VideoCapture(index);
+                this.enabled = this.capture.Open(index);
+            }).ContinueWith(t => CheckMenuItem());
+
+            return this.enabled;
+        }
+
+        public void Stop()
+        {
+            DisposeCaptureResources();
+        }
+
+        #endregion
+
+        #region Support routines
+
+        private void CheckMenuItem() => this.presenter?.CheckMenuItem(this.toolStripMenuItem, this.enabled);
 
         private void DisposeCameraResources()
         {
@@ -169,12 +183,6 @@ namespace Ifing
                 capture.Dispose();
             }
         }
-
-        #endregion
-
-        #region Event handler routines
-
-        private void Timer_Tick(object? sender, EventArgs e) => Capture();
 
         #endregion
     }
