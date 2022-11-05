@@ -28,6 +28,14 @@ namespace Ifing
                 menuItem.Checked = isChecked;
             });
 
+        void IPresenter.ResizePictureBox(PictureBox pictureBox, int width, int height)
+        {
+            this.Invoke((MethodInvoker)delegate
+            {
+                pictureBox.Size = new Size(width, height);
+            });
+        }
+
         void IPresenter.Start() => 
             this.Invoke((MethodInvoker)delegate 
             { 
@@ -179,7 +187,7 @@ namespace Ifing
 
         #region Timer event handler routines
 
-        private void Timer_Tick(object sender, EventArgs e) => this.videoManager.Capture();
+        private void Timer_Tick(object sender, EventArgs e) => this.videoManager.CaptureVideo();
 
         #endregion
     }

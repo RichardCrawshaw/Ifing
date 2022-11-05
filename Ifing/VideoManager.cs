@@ -86,11 +86,11 @@ namespace Ifing
 
         #region Methods
 
-        public void Capture()
+        public void CaptureVideo()
         {
             var tasks =
                 this.displays.Values
-                    .Select(n => Task.Run(() => n.Capture()));
+                    .Select(n => Task.Run(() => n.CaptureVideo()));
             Task.WhenAll(tasks).Wait();
         }
 
@@ -143,8 +143,6 @@ namespace Ifing
 
             foreach (var kvp in this.displays)
                 kvp.Value.Stop();
-            foreach (ToolStripMenuItem tsmi in this.MenuItems)
-                tsmi.Checked = false;
 
             Stop(false);
         }

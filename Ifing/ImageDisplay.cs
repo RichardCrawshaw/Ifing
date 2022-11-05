@@ -98,7 +98,7 @@ namespace Ifing
 
         #region Methods
 
-        public void Capture()
+        public void CaptureVideo()
         {
             if (!this.enabled) return;
 
@@ -151,6 +151,8 @@ namespace Ifing
             {
                 this.capture = new VideoCapture(index);
                 this.enabled = this.capture.Open(index);
+
+                this.presenter?.ResizePictureBox(this.picture, this.capture.FrameWidth, this.capture.FrameHeight);
             }).ContinueWith(t => CheckMenuItem());
 
             return this.enabled;

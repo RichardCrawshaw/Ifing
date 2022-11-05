@@ -11,7 +11,7 @@
 
         ImageDisplay this[int index] { get; }
 
-        void Capture();
+        void CaptureVideo();
         void Dispose();
         void Initialise();
         Task StartAsync();
