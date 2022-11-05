@@ -26,8 +26,14 @@ namespace Ifing
 
         #region Properties
 
+        /// <summary>
+        /// Gets the index into the video devices.
+        /// </summary>
         public int DisplayIndex { get; }
 
+        /// <summary>
+        /// Gets and sets the enabled state.
+        /// </summary>
         public bool Enabled
         {
             get => enabled;
@@ -37,6 +43,10 @@ namespace Ifing
                 CheckMenuItem();
             }
         }
+
+        /// <summary>
+        /// Gets whether the current <see cref="ImageDisplay"/> instance has been disposed.
+        /// </summary>
         public bool IsDisposed { get; private set; } = false;
 
         #endregion
@@ -98,6 +108,9 @@ namespace Ifing
 
         #region Methods
 
+        /// <summary>
+        /// Captures video.
+        /// </summary>
         public void CaptureVideo()
         {
             if (!this.enabled) return;
@@ -143,14 +156,18 @@ namespace Ifing
             }
         }
 
-        public async Task<bool> StartAsync(int index)
+        /// <summary>
+        /// Asynchronously starts the current <see cref="ImageDisplay"/> instance.
+        /// </summary>
+        /// <returns>A <see cref="Task{TResult}"/> that represents the asynchronous operation and contains a <see cref="bool"/> that is true on success; false otherwise.</returns>
+        public async Task<bool> StartAsync()
         {
             DisposeCameraResources();
 
             await Task.Run(() =>
             {
-                this.capture = new VideoCapture(index);
-                this.enabled = this.capture.Open(index);
+                this.capture = new VideoCapture(this.DisplayIndex);
+                this.enabled = this.capture.Open(this.DisplayIndex);
 
                 this.presenter?.ResizePictureBox(this.picture, this.capture.FrameWidth, this.capture.FrameHeight);
             }).ContinueWith(t => CheckMenuItem());
@@ -158,6 +175,9 @@ namespace Ifing
             return this.enabled;
         }
 
+        /// <summary>
+        /// Stops the current <see cref="ImageDisplay"/>
+        /// </summary>
         public void Stop()
         {
             DisposeCaptureResources();

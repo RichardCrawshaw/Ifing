@@ -16,20 +16,26 @@ namespace Ifing
 
         #region Properties
 
+        /// <inheritdoc/>
         public int Count => this.devices.Count;
 
+        /// <inheritdoc/>
         public List<PictureBox> Images { get; } = new();
 
+        /// <inheritdoc/>
         public bool IsDisposed { get; private set; }
 
+        /// <inheritdoc/>
         public bool? IsRunning { get; private set; } = false;
 
+        /// <inheritdoc/>
         public List<ToolStripMenuItem> MenuItems { get; } = new();
 
         #endregion
 
         #region Indexers
 
+        /// <inheritdoc/>
         public ImageDisplay this[int index] => this.displays[index];
 
         #endregion
@@ -86,6 +92,7 @@ namespace Ifing
 
         #region Methods
 
+        /// <inheritdoc/>
         public void CaptureVideo()
         {
             var tasks =
@@ -94,6 +101,7 @@ namespace Ifing
             Task.WhenAll(tasks).Wait();
         }
 
+        /// <inheritdoc/>
         public void Initialise()
         {
             // Get a list of video input devices.
@@ -118,6 +126,7 @@ namespace Ifing
             }
         }
 
+        /// <inheritdoc/>
         public async Task StartAsync()
         {
             if (this.IsRunning ?? true) return;
@@ -126,14 +135,15 @@ namespace Ifing
             Start(true);
 
             var tasks =
-                this.displays
-                    .Select(item => item.Value.StartAsync(item.Key));
+                this.displays.Values
+                    .Select(item => item.StartAsync());
 
             await
                 Task.WhenAll(tasks)
                     .ContinueWith(t => Start(false));
         }
 
+        /// <inheritdoc/>
         public void Stop()
         {
             if (!(this.IsRunning ?? false)) return;

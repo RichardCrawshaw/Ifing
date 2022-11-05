@@ -22,12 +22,14 @@ namespace Ifing
 
         #region IPresenter methods
 
+        /// <inheritdoc/>
         void IPresenter.CheckMenuItem(ToolStripMenuItem menuItem, bool isChecked) => 
             this.Invoke((MethodInvoker)delegate
             {
                 menuItem.Checked = isChecked;
             });
 
+        /// <inheritdoc/>
         void IPresenter.ResizePictureBox(PictureBox pictureBox, int width, int height)
         {
             this.Invoke((MethodInvoker)delegate
@@ -36,12 +38,14 @@ namespace Ifing
             });
         }
 
+        /// <inheritdoc/>
         void IPresenter.Start() => 
             this.Invoke((MethodInvoker)delegate 
             { 
                 this.timer.Start(); 
             });
 
+        /// <inheritdoc/>
         void IPresenter.Start(bool flag)
         {
             if (flag)
@@ -65,12 +69,14 @@ namespace Ifing
             }
         }
 
+        /// <inheritdoc/>
         void IPresenter.Stop() =>
             this.Invoke((MethodInvoker)delegate 
             { 
                 this.timer.Stop(); 
             });
 
+        /// <inheritdoc/>
         void IPresenter.Stop(bool flag)
         {
             if (flag)
