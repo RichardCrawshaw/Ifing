@@ -2,15 +2,15 @@
 
 namespace Ifing
 {
-    internal class VideoManager :
+    internal class VideoManager(IPresenter presenter) :
         IVideoManager
     {
         #region Fields
 
-        private readonly IPresenter presenter;
+        private readonly IPresenter presenter = presenter;
 
-        private readonly List<DsDevice> devices = new();
-        private readonly Dictionary<int, ImageDisplay> displays = new();
+        private readonly List<DsDevice> devices = [];
+        private readonly Dictionary<int, ImageDisplay> displays = [];
 
         #endregion
 
@@ -20,7 +20,7 @@ namespace Ifing
         public int Count => this.devices.Count;
 
         /// <inheritdoc/>
-        public List<PictureBox> Images { get; } = new();
+        public List<PictureBox> Images { get; } = [];
 
         /// <inheritdoc/>
         public bool IsDisposed { get; private set; }
@@ -29,7 +29,7 @@ namespace Ifing
         public bool? IsRunning { get; private set; } = false;
 
         /// <inheritdoc/>
-        public List<ToolStripMenuItem> MenuItems { get; } = new();
+        public List<ToolStripMenuItem> MenuItems { get; } = [];
 
         #endregion
 
@@ -37,15 +37,6 @@ namespace Ifing
 
         /// <inheritdoc/>
         public ImageDisplay this[int index] => this.displays[index];
-
-        #endregion
-
-        #region Constructors
-
-        public VideoManager(IPresenter presenter)
-        {
-            this.presenter = presenter;
-        }
 
         #endregion
 
