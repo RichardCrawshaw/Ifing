@@ -5,7 +5,7 @@ namespace Ifing
     {
         #region Fields
 
-        private readonly IVideoManager videoManager;
+        private readonly VideoManager videoManager;
 
         #endregion
 
@@ -24,23 +24,21 @@ namespace Ifing
 
         /// <inheritdoc/>
         void IPresenter.CheckMenuItem(ToolStripMenuItem menuItem, bool isChecked) => 
-            this.Invoke((MethodInvoker)delegate
+            Invoke((MethodInvoker)delegate
             {
                 menuItem.Checked = isChecked;
             });
 
         /// <inheritdoc/>
-        void IPresenter.ResizePictureBox(PictureBox pictureBox, int width, int height)
-        {
-            this.Invoke((MethodInvoker)delegate
+        void IPresenter.ResizePictureBox(PictureBox pictureBox, int width, int height) =>
+            Invoke((MethodInvoker)delegate
             {
                 pictureBox.Size = new Size(width, height);
             });
-        }
 
         /// <inheritdoc/>
         void IPresenter.Start() => 
-            this.Invoke((MethodInvoker)delegate 
+            Invoke((MethodInvoker)delegate 
             { 
                 this.timer.Start(); 
             });
@@ -50,7 +48,7 @@ namespace Ifing
         {
             if (flag)
             {
-                this.Invoke((MethodInvoker)delegate
+                Invoke((MethodInvoker)delegate
                 {
                     this.tsmiVideoStart.Enabled = false;
                     this.tssbVideoStart.Enabled = false;
@@ -58,7 +56,7 @@ namespace Ifing
             }
             else
             {
-                this.Invoke((MethodInvoker)delegate
+                Invoke((MethodInvoker)delegate
                 {
                     this.tsmiVideoStart.Visible = false;
                     this.tsmiVideoStop.Visible = true;
@@ -71,7 +69,7 @@ namespace Ifing
 
         /// <inheritdoc/>
         void IPresenter.Stop() =>
-            this.Invoke((MethodInvoker)delegate 
+            Invoke((MethodInvoker)delegate 
             { 
                 this.timer.Stop(); 
             });
@@ -81,7 +79,7 @@ namespace Ifing
         {
             if (flag)
             {
-                this.Invoke((MethodInvoker)delegate
+                Invoke((MethodInvoker)delegate
                 {
                     this.tsmiVideoStop.Enabled = false;
                     this.tssbVideoStart.Enabled = false;
@@ -89,7 +87,7 @@ namespace Ifing
             }
             else
             {
-                this.Invoke((MethodInvoker)delegate
+                Invoke((MethodInvoker)delegate
                 {
                     this.tsmiVideoStop.Visible = false;
                     this.tsmiVideoStart.Visible = true;

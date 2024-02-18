@@ -6,14 +6,17 @@ namespace Ifing
     /// <summary>
     /// Class to manage the display of a video stream via an <see cref="Image"/> on a <see cref="Form"/>.
     /// </summary>
-    internal class ImageDisplay :
-            IDisposable
+    internal class ImageDisplay(IPresenter? presenter,
+                                PictureBox picture,
+                                int displayIndex,
+                                ToolStripMenuItem toolStripMenuItem) :
+        IDisposable
     {
         #region Fields
 
-        private readonly IPresenter? presenter;
-        private readonly PictureBox picture;
-        private readonly ToolStripMenuItem toolStripMenuItem;
+        private readonly IPresenter? presenter = presenter;
+        private readonly PictureBox picture = picture;
+        private readonly ToolStripMenuItem toolStripMenuItem = toolStripMenuItem;
         private VideoCapture? capture;
         private Bitmap? image1;
         private Bitmap? image2;
@@ -29,17 +32,17 @@ namespace Ifing
         /// <summary>
         /// Gets the index into the video devices.
         /// </summary>
-        public int DisplayIndex { get; }
+        public int DisplayIndex { get; } = displayIndex;
 
         /// <summary>
         /// Gets and sets the enabled state.
         /// </summary>
         public bool Enabled
         {
-            get => enabled;
+            get => this.enabled;
             set
             {
-                enabled = value;
+                this.enabled = value;
                 CheckMenuItem();
             }
         }
@@ -51,26 +54,11 @@ namespace Ifing
 
         #endregion
 
-        #region Constructors
-
-        public ImageDisplay(IPresenter? presenter,
-                            PictureBox picture,
-                            int displayIndex,
-                            ToolStripMenuItem toolStripMenuItem)
-        {
-            this.presenter = presenter;
-            this.picture = picture;
-            this.DisplayIndex = displayIndex;
-            this.toolStripMenuItem = toolStripMenuItem;
-        }
-
-        #endregion
-
         #region IDisposable support
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!IsDisposed)
+            if (!this.IsDisposed)
             {
                 if (disposing)
                 {
@@ -86,7 +74,7 @@ namespace Ifing
                 this.image1 = null;
                 this.image2 = null;
 
-                IsDisposed = true;
+                this.IsDisposed = true;
             }
         }
 
@@ -178,10 +166,7 @@ namespace Ifing
         /// <summary>
         /// Stops the current <see cref="ImageDisplay"/>
         /// </summary>
-        public void Stop()
-        {
-            DisposeCaptureResources();
-        }
+        public void Stop() => DisposeCaptureResources();
 
         #endregion
 
@@ -202,7 +187,7 @@ namespace Ifing
             {
                 if (!this.capture.IsDisposed)
                     this.capture.Release();
-                capture.Dispose();
+                this.capture.Dispose();
             }
         }
 
